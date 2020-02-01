@@ -85,6 +85,26 @@ pub struct TransactionalTree {
     pub(super) read_cache: Rc<RefCell<HashMap<IVec, Option<IVec>>>>,
 }
 
+impl From<&Tree> for TransactionalTree {
+    fn from(tree: &Tree) -> Self {
+        TransactionalTree {
+            tree: tree.clone(),
+            writes: Default::default(),
+            read_cache: Default::default(),
+        }
+    }
+}
+
+impl From<&&Tree> for TransactionalTree {
+    fn from(tree: &&Tree) -> Self {
+        TransactionalTree {
+            tree: (*tree).clone(),
+            writes: Default::default(),
+            read_cache: Default::default(),
+        }
+    }
+}
+
 /// An error type that is returned from the closure
 /// passed to the `transaction` method.
 #[derive(Debug, Clone, PartialEq)]
@@ -514,6 +534,30 @@ impl<E> Transactional<E> for Tree {
 
     fn view_overlay(overlay: &TransactionalTrees) -> Self::View {
         overlay.inner[0].clone()
+    }
+}
+
+impl<E> Transactional<E> for Vec<Tree> {
+    type View = Vec<TransactionalTree>;
+
+    fn make_overlay(&self) -> TransactionalTrees {
+        TransactionalTrees { inner: self.iter().map(Into::into).collect() }
+    }
+
+    fn view_overlay(overlay: &TransactionalTrees) -> Self::View {
+        overlay.inner.clone()
+    }
+}
+
+impl<E> Transactional<E> for Vec<&Tree> {
+    type View = Vec<TransactionalTree>;
+
+    fn make_overlay(&self) -> TransactionalTrees {
+        TransactionalTrees { inner: self.iter().map(Into::into).collect() }
+    }
+
+    fn view_overlay(overlay: &TransactionalTrees) -> Self::View {
+        overlay.inner.clone()
     }
 }
 
