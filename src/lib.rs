@@ -270,6 +270,7 @@ pub use self::{
     transaction::{
         abort, ConflictableTransactionError, ConflictableTransactionResult,
         TransactionError, TransactionResult, Transactional, TransactionalTree,
+        UnabortableTransactionError,
     },
     tree::{CompareAndSwapError, CompareAndSwapResult, Tree},
 };
